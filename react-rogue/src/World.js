@@ -6,6 +6,7 @@ class World {
         this.height = height;
         this.tilesize = tilesize;
         this.entities = [ new Player(0,0,16)];
+        this.history = ['You enter the dungeon', '----'];
 
         //create 2D array
         this.worldmap = new Array(this.width);
@@ -18,10 +19,18 @@ class World {
         return this.entities[0];
     }
 
+    add(entity) {
+        this.entities.push(entity);
+    }
+
+    remove(entity){
+        this.entities = this.entities.filter(e => e !== entity);
+    }
+
     moveToSpace(entity){
        for(let x = entity.x; x <this.width; x++){
             for(let y = entity.y; y<this.height; y++){
-                if(this.worldmap[x][y] === 0){
+                if(this.worldmap[x][y] === 0 && !this.getEntityAtLocation(x,y)){
                   entity.x =x;
                   entity.y = y;
                   return;  
@@ -38,11 +47,24 @@ class World {
         );
     }
 
+    getEntityAtLocation(x,y,){
+        return this.entities.find(entity => entity.x === x && entity.y === y);
+    }
+
     movePlayer(dx,dy){
         let tempPlayer = this.player.copyPlayer();
         tempPlayer.move(dx,dy);
+
+        let entity = this.getEntityAtLocation(tempPlayer.x, tempPlayer.y);
+        if(entity){
+            console.log(entity);
+            entity.action('bump', this);
+            return;
+        }
+
+
         if(this.isWall(tempPlayer.x, tempPlayer.y)){
-            console.log("Way blocked at ${tempPlayer.x} : ${tempPlayer.y}!")
+            console.log(`Way blocked at ${tempPlayer.x} : ${tempPlayer.y}!`);
         }else{
             this.player.move(dx,dy);
         }
@@ -79,6 +101,11 @@ class World {
     drawWall(context, x, y){
         context.fillStyle = '#000';
         context.fillRect(x* this.tilesize, y *this.tilesize, this.tilesize, this.tilesize);
+    }
+
+    addToHistory(history){
+        this.history.push(history);
+        if(this.history.length > 6) this.history.shift();
     }
 }
 
