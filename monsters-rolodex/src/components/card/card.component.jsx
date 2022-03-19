@@ -14,7 +14,6 @@ const Card = ({monster}) => {
         </div>
     );
 }
-
 export default Card;
 
 // class Card extends Component {
